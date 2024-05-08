@@ -306,15 +306,17 @@ sns.heatmap(loan_data[['int_rate', 'loan_status_numerical']].corr(), annot=True,
 plt.title('Correlation Heatmap')
 plt.show()
 
+# Maping numerical values of loan status to labels
+loan_status_labels = {1: 'Fully Paid', 2: 'Current', 3: 'Charged Off'}  # Updated to include 'Current'
+loan_data['loan_status_label'] = loan_data['loan_status_numerical'].map(loan_status_labels)
+
 # correlation boxplot
 plt.figure(figsize=(8, 6))
-plt.boxplot([loan_data['int_rate'],loan_data['loan_status_numerical']])
-plt.title('Correlation between Interest Rate and Loan Status')
-plt.xlabel('Loan Status')
-plt.ylabel('Interest Rates')
+plt.boxplot([fully_paid_interest_rates, charged_off_interest_rates], labels=['Fully Paid', 'Charged Off'])
+plt.title('Boxplot of Interest Rate by Loan Status')
+plt.ylabel('Interest Rate')
 plt.grid(True)
 plt.show()
-print("Correlation between Interest Rate and Loan Status:", correlation)
 
 ### Analysis 3: To detrmine if there is any difference in default rate of loan that are verified or source verified vs. unverified laons.
 #Approach:
