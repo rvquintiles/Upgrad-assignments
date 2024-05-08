@@ -1,4 +1,4 @@
-# Project Name
+# Lending Club Assingment
 > To evaluate if lending business is profitable and what proportion of loan are getting default
 
 
