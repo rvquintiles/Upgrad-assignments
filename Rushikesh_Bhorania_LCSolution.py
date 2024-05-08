@@ -88,6 +88,9 @@ len(column_names)
 
 loan_data.nunique()
 
+# coverting interset value from str to float
+loan_data["int_rate"] = loan_data["int_rate"].str.replace("%", "").astype(float)
+
 # Converting loan status data into numerical values and adding column to dataset
 def map_loan_status(status):
     if status == "Fully Paid":
@@ -148,18 +151,13 @@ print("Columns with more than 30 unique:",columns_morethan_30unique)
 print("Columns with less than 30 unique:",columns_lessthan_30unique)
 len(extra_columns)
 
-# coverting interset value from str to float
-loan_data["int_rate"] = loan_data["int_rate"].str.replace("%", "").astype(float)
-
 # create list of columns containing integer dtypes
 numerical = loan_data.select_dtypes(include=['int','float'])
-
 final_numerical = numerical.columns.tolist()
 print("Numerical Columns:" , final_numerical)
 
 # creat list of columns containing strng or object dtypes
 category = loan_data.select_dtypes(include=['object'])
-
 final_categorical = category.columns.tolist()
 print("Category Columns:", final_categorical)
 
@@ -223,7 +221,63 @@ sns.heatmap(loan_data[['loan_amnt', 'int_rate', 'installment','loan_status_numer
 plt.show()
 
 ## Statistical analysis
-### Analysis 1: To detrmine if there is any difference in interest rate of loan that are fully paid vs loans that are charged off.
+### Analysis 1: To detrmine if there is any trend in default rate of loan among the applicant from particular state or particular grade of loan. 
+#Approach:
+#1. Interest rate data is divided into 2 parts. (a) interest rate of loan that are fully paid vs (b) interest rate of loan that is charged off.
+#2. 1 pair t-test is performed on this data to evaluate if there is any difference between these two data.
+#### Rational for using 1-pair t-test is because this is qualititative analysis to determine if there is any statistical difference between interest rate of fully paid loan vs charged off loan 
+
+# Grouping the data by State and Grade and then add data of current loans
+state_grouped = loan_data.groupby('addr_state')['loan_status']
+state_default_rates = state_grouped.apply(lambda x: ((x == 'Charged Off') | (x == 'Current')).mean())
+state_current_loans = state_grouped.apply(lambda x: (x == 'Current').sum())
+
+grade_grouped = loan_data.groupby('grade')['loan_status']
+grade_default_rates = grade_grouped.apply(lambda x: ((x == 'Charged Off') | (x == 'Current')).mean())
+grade_current_loans = grade_grouped.apply(lambda x: (x == 'Current').sum())
+
+# EDA analysis by ploting graph of default rate Visualize Default Rates
+fig, ax1 = plt.subplots(figsize=(10, 6))
+
+color = 'tab:blue'
+ax1.set_ylabel('Default Rate')
+ax1.set_xlabel('State', color=color)
+state_default_rates.sort_values().plot(kind='bar', color=color, alpha=0.7, label='Default Rate')
+ax1.tick_params(axis='x', labelcolor=color)
+
+ax2 = ax1.twinx()
+color = 'tab:red'
+ax2.set_ylabel('Number of Current Loans', color=color)
+state_current_loans[state_default_rates.sort_values().index].plot(kind='line', color=color, label='Current Loans')
+ax2.tick_params(axis='y', labelcolor=color)
+
+fig.tight_layout()
+fig.legend(loc='upper right')
+plt.title('Default Rates by State with Number of Current Loans')
+plt.show()
+
+# Bar plot for default rates by grade
+fig, ax1 = plt.subplots(figsize=(8, 6))
+
+color = 'tab:orange'
+ax1.set_ylabel('Default Rate', color=color)
+ax1.set_xlabel('Grade')
+grade_default_rates.sort_index().plot(kind='bar', color=color, alpha=0.7, label='Default Rate')
+ax1.tick_params(axis='y', labelcolor=color)
+
+ax2 = ax1.twinx()
+color = 'tab:red'
+ax2.set_ylabel('Number of Current Loans', color=color)
+grade_current_loans.plot(kind='line', color=color, label='Current Loans')
+ax2.tick_params(axis='y', labelcolor=color)
+
+fig.tight_layout()
+fig.legend(loc='upper right')
+plt.title('Default Rates by Grade with Number of Current Loans')
+plt.show()
+
+
+### Analysis 2: To detrmine if there is any difference in interest rate of loan that are fully paid vs loans that are charged off.
 #Approach:
 #1. Interest rate data is divided into 2 parts. (a) interest rate of loan that are fully paid vs (b) interest rate of loan that is charged off.
 #2. 1 pair t-test is performed on this data to evaluate if there is any difference between these two data.
@@ -256,14 +310,13 @@ plt.show()
 plt.figure(figsize=(8, 6))
 plt.boxplot([loan_data['int_rate'],loan_data['loan_status_numerical']])
 plt.title('Correlation between Interest Rate and Loan Status')
-plt.xlabel('Interest Rate')
-plt.ylabel('Loan Status')
+plt.xlabel('Loan Status')
+plt.ylabel('Interest Rates')
 plt.grid(True)
 plt.show()
-
 print("Correlation between Interest Rate and Loan Status:", correlation)
 
-### Analysis 2: To detrmine if there is any difference in default rate of loan that are verified or source verified vs. unverified laons.
+### Analysis 3: To detrmine if there is any difference in default rate of loan that are verified or source verified vs. unverified laons.
 #Approach:
 #1. Default rate is calculated from loan status and loan verified data. Loan verified data is convered in numberical data to have quantitative evaluation. From this data default rate of verified loan vs unverified loan is determined.
 #2. From this data statistical parameter like confidence interval, sample size, pooled standard deviaiton, margin of error are calculated and 2 pair t-test is performed on this data to evaluate if there is any difference between these two data. 
@@ -302,7 +355,6 @@ t_stat, p_value = ttest_ind(
     loan_data.loc[loan_data['loan_verified_numerical'] == 1, 'loan_status_numerical'],
     loan_data.loc[loan_data['loan_verified_numerical'] == 0, 'loan_status_numerical']
 )
-
 # Calculating degrees of freedom
 degrees_of_freedom = len(loan_data[(loan_data['loan_verified_numerical'] == 1) & (loan_data['loan_status'] == 'Charged Off')]) + len(loan_data[(loan_data['loan_verified_numerical'] == 0) & (loan_data['loan_status'] == 'Charged Off')]) - 2
 
@@ -332,7 +384,7 @@ else:
     print("There is no significant difference in default rates between verified and unverified loans at", confidence_level * 100, "% confidence level.")
     print("The probability of a difference in default rates is not statistically significant.")
 
-### Analysis 3: To detrmine if there is any difference in default rate of loan based on dti? DTI is debt to income ratio.
+### Analysis 4: To detrmine if there is any difference in default rate of loan based on dti? DTI is debt to income ratio.
 #Approach:
 #1. DTI value is divided into 2 parts. Loan with DTI of greater than 20 and loan with DTI or less than equal to 20. Loan having DTI more than 20 is classified as high DTI loan and remaining loans as low DTI loan.
 #2. Based on DTI values default rate is calculated as high DTI default rate vs low DTI defualt rate.
@@ -440,7 +492,6 @@ net_profit.plot(title='Net Profit Over Time')
 plt.xlabel('Date')
 plt.ylabel('Net Profit')
 plt.show()
-
 
 # Statistical Tests
 # Performing statistical tests to determine if profitability metrics are significantly different from zero

@@ -19,7 +19,7 @@
             - Columns having more than 30% mising data was identified and removed.
             - Columns not having any duplicate value was identified and removed. This is because if columns have all uniqie values then it is not possible to confer any analysis.
             - Lastly set of columns were manually identified and removed from analysis.
-        2. Data manupilation: Once data cleaning was performed 2 columns were added by converting loan status columns and loan verified column into numerical values so that co-relation analysis can be performed on these data
+        2. Data manupilation: Once data cleaning was performed 2 columns were added by converting loan status columns and loan verified column into numerical values so that co-relation analysis can be performed on these data. Additionally interest rate data type was converted from string to float.
         3. EDA: Categorial columns and numerical columns list was created to perform EDA. 
         4. Inferential statistics is used to determine following:
             - To evaluate significant difference between interest rates of fully paid loan and charged off loans.
@@ -28,11 +28,15 @@
             - To evalaute if business is profitable or not?
 
 - What is the business probem that project is trying to solve?
-    - Project evaluates the data to determine if interest rates and loan verification process has any impact on loan getting defauls. Analysis is performed to find 
-        1. To find co-relation if higher interest rate is resulting in loan default or not?
-        2. to evaluate if more number of unverified loan are getting default?
-        3. To evaluate if loan with high DTI has higher default rate or not?
-        4. To evalute if loan business is profitable or not
+    - To identify risky loan applicants, then such loans can be reduced thereby cutting down the amount of credit loss by: 
+        1. Identification of such applicants using EDA is the aim of this case study. In other words, the company wants to understand the driving factors (or driver variables) behind loan default, i.e. the variables which are strong indicators of default. The company can utilise this knowledge for its portfolio and risk assessment. 
+
+    To achieve above objectives project evaluates the data to determine if there is any trend or co-relation in (a) geography of loan applicant, (b) grade of loan approved, (c) interest rate, (d) loan verification status and (e) Debt to Income ratio resulting in higher default. Following analysis is performed to find 
+        1. To find number of loan default based on address state of loan applicant and loan grade of loan approved. Based on this data it was evaluated by checking number of current active loan in these geography and loan grade to determine the risk of default and impact on business.
+        2. To find co-relation if higher interest rate is resulting in loan default or not?
+        3. to evaluate if more number of unverified loan are getting default?
+        4. To evaluate if loan with high DTI has higher default rate or not?
+        5. To evalute if loan business is profitable or not
 - What is the dataset that is being used?
     - Loan.csv is used for analysing the data.
 
@@ -55,6 +59,7 @@
     - Number of installment is strongly co-related with loan amount.
     - Interest rate have higher co-relation with all parameter of loan amount, installment, loan status and verification.
 - Conclusion 4: Inferential statistics
+    - Highest number of loan default are from NE state. Rate of default is approx 5-6 times higher than default from other address state. Additionally highest default rate is observed in loan grade "E", "F" and "G". From the analysis it is observed that number of current active loan is much lesser in NE address state and also under loan grade "E", "F" and "G" which is good for business.
     - Statistical significant difference is observed in interest rates between fully paid and charged off loans is observed. 
     - Statistical significant difference was observed in default rates between verified and unverified loans at 95.0 % confidence level.
     - Statistical significant difference was observed in default rates between high DTI and low DTI loans at 95.0 % confidence level.
